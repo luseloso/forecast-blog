@@ -1,0 +1,45 @@
+{
+  "DatasetGroup": {
+    "DatasetGroupName":"DatasetGroupName",
+    "Domain": "CUSTOM"
+  },
+  "Predictor": {
+    "PredictorName": "PredictorName",
+    "ForecastHorizon": 30,
+    "FeaturizationConfig":{
+      "ForecastFrequency":"D"
+    },
+    "PerformAutoML": true
+  },
+  "Forecast": {
+    "ForecastName": "ForecastName",
+    "ForecastTypes":[
+      "0.01",
+      "0.50",
+      "0.90"
+    ]
+  },
+  "TimestampFormat": "yyyy-MM-dd",
+  "Datasets": [
+    {
+      "DatasetName": "DatasetName",
+      "Domain": "CUSTOM",
+      "DatasetType": "TARGET_TIME_SERIES",
+      "DataFrequency": "D",
+      "Schema": {
+        "Attributes": [
+          {
+            "AttributeName": "timestamp",
+            "AttributeType": "timestamp"
+          }, {
+              "AttributeName": "target_value",
+              "AttributeType": "float"
+          }, {
+            "AttributeName": "item_id",
+            "AttributeType": "string"
+          }
+        ]
+      }
+    }
+  ] 
+}
