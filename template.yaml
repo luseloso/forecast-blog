@@ -13,10 +13,6 @@ Parameters:
     Type: String
     Description: Email to notify when step function ends
     Default: youremail@yourprovider.com
-  BucketName:
-    Type: String
-    Description: S3 Bucket name
-    Default: TBD
   ParameterFile:
     Type: String
     Description: S3 Bucket name
@@ -529,10 +525,7 @@ Outputs:
   ForecastBucketName:
     Description: Forecast bucket name to drop your files
     Value: !Ref ForecastBucket
-  
-#   HelloWorldFunction:
-#     Description: "Hello World Lambda Function ARN"
-#     Value: !GetAtt HelloWorldFunction.Arn
-#   HelloWorldFunctionIamRole:
-#     Description: "Implicit IAM Role created for Hello World function"
-#     Value: !GetAtt HelloWorldFunctionRole.Arn
+  AthenaBucketName:
+    Description: Athena bucket name to drop your files
+    Value: !Ref AthenaBucket
+    

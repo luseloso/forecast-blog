@@ -1,0 +1,3 @@
+[sqlalchemy.dialects]
+awsathena.rest = pyathena.sqlalchemy_athena:AthenaDialect
+
