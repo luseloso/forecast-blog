@@ -38,6 +38,12 @@ The name of each bucket can be found on the output section of the cloudformation
 the console. To see it access the Cloudformation tab on the console. If you did not change 
 the command line, the stack name will be __x__.
 
+In order to test the deployment please run the following command inside your parent directory.
+**Note:** You will need to specify the correct S3 bucket name created before.
+```
+aws s3 sync ./testing-data s3://forecaststeps-forecastbucket-XXXXXXXXXX
+```
+
 The step function starts upon new files are dropped within the ```s3://ForecastBucket/train/```
 folder. When the steps are completed, the S3 Bucket will have the following structure:
 ```
@@ -55,6 +61,10 @@ to Athena.
 
 You should also receive an email subscription confirmation by AWS SNS. Confirm it in order
 to get notifications from the step functions.
+
+
+
+
 
 ## Configuration & Settings
 

@@ -67,7 +67,6 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       DisplayName: StepsTopic
-      TopicName: forecast-steps-topic
       Subscription:
         - Endpoint: !Ref Email
           Protocol: email
