@@ -1,10 +1,10 @@
 {
   "DatasetGroup": {
-    "DatasetGroupName":"WeatherGithubTest1",
+    "DatasetGroupName":"WeatherGithubExample",
     "Domain": "CUSTOM"
   },
   "Predictor": {
-    "PredictorName": "WeatherGithubPredictor",
+    "PredictorName": "WeatherGithubExamplePredictor",
     "ForecastHorizon": 72,
     "FeaturizationConfig":{
       "ForecastFrequency":"H"
@@ -14,7 +14,7 @@
   "Forecast": {
     "ForecastName": "WeatherGithubForecastExample",
     "ForecastTypes":[
-      "0.01",
+      "0.10",
       "0.50",
       "0.90"
     ]
