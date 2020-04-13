@@ -1,11 +1,11 @@
 {
   "DatasetGroup": {
-    "DatasetGroupName":"WeatherGithubTest",
+    "DatasetGroupName":"WeatherGithubTest1",
     "Domain": "CUSTOM"
   },
   "Predictor": {
     "PredictorName": "WeatherGithubPredictor",
-    "ForecastHorizon": 24,
+    "ForecastHorizon": 72,
     "FeaturizationConfig":{
       "ForecastFrequency":"H"
     },

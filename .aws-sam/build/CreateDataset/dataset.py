@@ -16,7 +16,7 @@ def lambda_handler(event, context):
         bucket_name=event['bucket'], key_name=os.environ['PARAMS_FILE']
     )['Datasets']
     status = None
-    event['DatasetArn'] = ARN.format(account=ACCOUNTID, name='DatasetName')
+    event['DatasetArn'] = ARN.format(account=ACCOUNTID, name=params[0]['DatasetName'])
     event['AccountID'] = ACCOUNTID
     try:
         status = FORECAST_CLI.describe_dataset(DatasetArn=event['DatasetArn'])

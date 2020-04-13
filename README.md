@@ -112,3 +112,17 @@ To perform visualizations on the forecasted data we recommend using Athena to qu
 already created by the StepFunctions workflow. You can merge the tables __train__ and __forecast__
 using basic SQL queries and get a unified view over your training and forecasted dataset. Further
 instructions on how to visualize using Amazon QuickSight will be provided by the attached [AWS Blogpost]().
+
+`
+SELECT LOWER(quicksight.item_id) as item_id,
+         quicksight.target_value,
+         quicksight.timestamp,
+         quicksight.type
+FROM forecast_blog.quicksight
+UNION ALL
+SELECT LOWER(training.item_id) as item_id,
+         training.target_value,
+         training.timestamp,
+         'history' as type
+FROM forecast_blog.training
+`
