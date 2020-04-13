@@ -1,10 +1,10 @@
 {
   "DatasetGroup": {
-    "DatasetGroupName":"WeatherGithubExample",
+    "DatasetGroupName":"GithubExample",
     "Domain": "CUSTOM"
   },
   "Predictor": {
-    "PredictorName": "WeatherGithubExamplePredictor",
+    "PredictorName": "GithubExamplePredictor",
     "ForecastHorizon": 72,
     "FeaturizationConfig":{
       "ForecastFrequency":"H"
@@ -12,7 +12,7 @@
     "PerformAutoML": true
   },
   "Forecast": {
-    "ForecastName": "WeatherGithubForecastExample",
+    "ForecastName": "GithubForecastExample",
     "ForecastTypes":[
       "0.10",
       "0.50",
@@ -22,7 +22,7 @@
   "TimestampFormat": "yyyy-MM-dd hh:mm:ss",
   "Datasets": [
     {
-      "DatasetName": "WeatherGithubTargetTimeSeries",
+      "DatasetName": "GithubTargetTimeSeries",
       "Domain": "CUSTOM",
       "DatasetType": "TARGET_TIME_SERIES",
       "DataFrequency": "H",
