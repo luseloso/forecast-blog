@@ -1,0 +1,7 @@
+.aws-sam
+.vscode
+.pylintrc
+.aws
+.DS_Store
+environment/*
+events/*

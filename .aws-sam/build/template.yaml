@@ -15,8 +15,8 @@ Parameters:
     Default: youremail@yourprovider.com
   ParameterFile:
     Type: String
-    Description: S3 Bucket name
-    Default: params_test.json
+    Description: Parameters file name, which will reside in your S3 parent directory
+    Default: params.json
 Resources:
   AthenaBucket:
     Type: AWS::S3::Bucket
