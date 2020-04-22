@@ -38,10 +38,12 @@ The name of each bucket can be found on the output section of the cloudformation
 the console. To see it access the Cloudformation tab on the console. If you did not change 
 the command line, the stack name will be __x__.
 
-In order to test the deployment please run the following command inside your parent directory.
+In order to test the deployment please run the following commandd inside your parent directory.
 **Note:** You will need to specify the correct S3 bucket name created before.
 ```
-aws s3 sync ./testing-data s3://forecaststeps-forecastbucket-XXXXXXXXXX
+aws s3 cp ./testing-data/params.json s3://{YOURBUCKETNAME}
+
+aws s3 sync ./testing-data/ s3://{YOURBUCKETNAME}
 ```
 
 The step function starts upon new files are dropped within the ```s3://ForecastBucket/train/```
@@ -61,10 +63,6 @@ to Athena.
 
 You should also receive an email subscription confirmation by AWS SNS. Confirm it in order
 to get notifications from the step functions.
-
-
-
-
 
 ## Configuration & Settings
 
@@ -123,16 +121,16 @@ already created by the StepFunctions workflow. You can merge the tables __train_
 using basic SQL queries and get a unified view over your training and forecasted dataset. Further
 instructions on how to visualize using Amazon QuickSight will be provided by the attached [AWS Blogpost]().
 
-`
-SELECT LOWER(quicksight.item_id) as item_id,
-         quicksight.target_value,
-         quicksight.timestamp,
-         quicksight.type
-FROM forecast_blog.quicksight
+```
+SELECT LOWER(forecast.item_id) as item_id,
+         forecast.target_value,
+         date_parse(forecast.timestamp, '%Y-%m-%d %H:%i:%s') as timestamp,
+         forecast.type
+FROM default.forecast
 UNION ALL
-SELECT LOWER(training.item_id) as item_id,
-         training.target_value,
-         training.timestamp,
+SELECT LOWER(train.item_id) as item_id,
+         train.target_value,
+         date_parse(train.timestamp, '%Y-%m-%d %H:%i:%s') as timestamp,
          'history' as type
-FROM forecast_blog.training
-`
+FROM default.train
+```
