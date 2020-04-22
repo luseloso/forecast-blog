@@ -146,7 +146,6 @@ def transform(s3_object, bucket, key, params):
 
 
 def lambda_handler(event, context):
-    # get_readings(event['bucket'])
     outdated_objects = S3_CLI.list_objects_v2(
         Bucket=event['bucket'], Prefix='quicksight'
     )
