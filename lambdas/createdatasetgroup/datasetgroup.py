@@ -1,36 +1,32 @@
-import logging
-import os
-from boto3 import client
-import actions, parameters
+from os import environ
+import actions
+from loader import Loader
 
-S3_CLI = client('s3')
-FORECAST_CLI = client('forecast')
-LOGGER = logging.getLogger()
-LOGGER.setLevel(logging.INFO)
-ARN = 'arn:aws:forecast:us-east-1:{account}:dataset-group/{name}'
+ARN = 'arn:aws:forecast:{region}:{account}:dataset-group/{name}'
+LOADER = Loader()
 
 
 def lambda_handler(event, context):
-    params = parameters.get_params(
-        bucket_name=event['bucket'], key_name=os.environ['PARAMS_FILE']
-    )['DatasetGroup']
+    dataset_group = event['params']['DatasetGroup']
     status = None
     event['DatasetGroupArn'] = ARN.format(
-        account=event['AccountID'], name=params['DatasetGroupName']
+        account=event['AccountID'],
+        name=dataset_group['DatasetGroupName'],
+        region=environ['AWS_REGION']
     )
     try:
-        status = FORECAST_CLI.describe_dataset_group(
+        status = LOADER.forecast_cli.describe_dataset_group(
             DatasetGroupArn=event['DatasetGroupArn']
         )
 
-    except FORECAST_CLI.exceptions.ResourceNotFoundException:
-        LOGGER.info(
+    except LOADER.forecast_cli.exceptions.ResourceNotFoundException:
+        LOADER.logger.info(
             'Dataset Group not found! Will follow to create Dataset Group.'
         )
-        FORECAST_CLI.create_dataset_group(
-            **params, DatasetArns=[event['DatasetArn']]
+        LOADER.forecast_cli.create_dataset_group(
+            **dataset_group, DatasetArns=[event['DatasetArn']]
         )
-        status = FORECAST_CLI.describe_dataset_group(
+        status = LOADER.forecast_cli.describe_dataset_group(
             DatasetGroupArn=event['DatasetGroupArn']
         )
 

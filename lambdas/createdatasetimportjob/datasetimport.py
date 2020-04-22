@@ -1,35 +1,31 @@
-import logging
-import os
-from boto3 import client
-import actions, parameters
+from os import environ
+import actions
+from loader import Loader
 
-FORECAST_CLI = client('forecast')
-LOGGER = logging.getLogger()
-LOGGER.setLevel(logging.INFO)
-ARN = 'arn:aws:forecast:us-east-1:{account}:dataset-import-job/{name}/{name}_{date}'
+ARN = 'arn:aws:forecast:{region}:{account}:dataset-import-job/{name}/{name}_{date}'
+LOADER = Loader()
 
 
 def lambda_handler(event, context):
-    params = parameters.get_params(
-        bucket_name=event['bucket'], key_name=os.environ['PARAMS_FILE']
-    )
+    params = event['params']
     status = None
     event['DatasetImportJobArn'] = ARN.format(
         account=event['AccountID'],
         date=event['currentDate'],
-        name=params['Datasets'][0]['DatasetName']
+        name=params['Datasets'][0]['DatasetName'],
+        region=environ['AWS_REGION']
     )
     try:
-        status = FORECAST_CLI.describe_dataset_import_job(
+        status = LOADER.forecast_cli.describe_dataset_import_job(
             DatasetImportJobArn=event['DatasetImportJobArn']
         )
 
-    except FORECAST_CLI.exceptions.ResourceNotFoundException:
-        LOGGER.info(
+    except LOADER.forecast_cli.exceptions.ResourceNotFoundException:
+        LOADER.logger.info(
             'Dataset import job not found! Will follow to create new job.'
         )
 
-        FORECAST_CLI.create_dataset_import_job(
+        LOADER.forecast_cli.create_dataset_import_job(
             DatasetImportJobName='{name}_{date}'.format(
                 name=params['Datasets'][0]['DatasetName'],
                 date=event['currentDate']
@@ -43,12 +39,12 @@ def lambda_handler(event, context):
                                 bucket=event['bucket']
                             ),
                         'RoleArn':
-                            os.environ['FORECAST_ROLE']
+                            environ['FORECAST_ROLE']
                     }
             },
             TimestampFormat=params['TimestampFormat']
         )
-        status = FORECAST_CLI.describe_dataset_import_job(
+        status = LOADER.forecast_cli.describe_dataset_import_job(
             DatasetImportJobArn=event['DatasetImportJobArn']
         )
 

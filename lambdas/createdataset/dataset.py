@@ -1,30 +1,33 @@
-import logging
-import os
+from os import environ
 from boto3 import client
-import actions, parameters
+import actions
+from loader import Loader
 
-FORECAST_CLI = client('forecast')
 ACCOUNTID = client('sts').get_caller_identity()['Account']
-LOGGER = logging.getLogger()
-ARN = 'arn:aws:forecast:us-east-1:{account}:dataset/{name}'
-
-LOGGER.setLevel(logging.INFO)
+ARN = 'arn:aws:forecast:{region}:{account}:dataset/{name}'
+LOADER = Loader()
 
 
 def lambda_handler(event, context):
-    params = parameters.get_params(
-        bucket_name=event['bucket'], key_name=os.environ['PARAMS_FILE']
-    )['Datasets']
+    datasets = event['params']['Datasets']
     status = None
-    event['DatasetArn'] = ARN.format(account=ACCOUNTID, name=params[0]['DatasetName'])
+    event['DatasetArn'] = ARN.format(
+        account=ACCOUNTID,
+        name=datasets[0]['DatasetName'],
+        region=environ['AWS_REGION']
+    )
     event['AccountID'] = ACCOUNTID
     try:
-        status = FORECAST_CLI.describe_dataset(DatasetArn=event['DatasetArn'])
-    except FORECAST_CLI.exceptions.ResourceNotFoundException:
-        LOGGER.info('Dataset not found! Will follow to create dataset.')
-        for dataset in params:
-            FORECAST_CLI.create_dataset(**dataset)
-        status = FORECAST_CLI.describe_dataset(DatasetArn=event['DatasetArn'])
+        status = LOADER.forecast_cli.describe_dataset(
+            DatasetArn=event['DatasetArn']
+        )
+    except LOADER.forecast_cli.exceptions.ResourceNotFoundException:
+        LOADER.logger.info('Dataset not found! Will follow to create dataset.')
+        for dataset in datasets:
+            LOADER.forecast_cli.create_dataset(**dataset)
+        status = LOADER.forecast_cli.describe_dataset(
+            DatasetArn=event['DatasetArn']
+        )
 
     actions.take_action(status['Status'])
     return event

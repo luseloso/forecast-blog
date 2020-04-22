@@ -1,4 +1,4 @@
-schemas_def = {
+SCHEMAS_DEF = {
     "RETAIL":
         {
             "fields": ["item_id", "timestamp", "demand"],

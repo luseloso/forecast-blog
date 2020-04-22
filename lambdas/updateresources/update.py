@@ -1,12 +1,11 @@
-import os
+from os import environ
 import codecs
 import csv
 import re
 from datetime import datetime
 from io import StringIO
 from boto3 import client, resource
-import parameters
-from schemas import schemas_def
+from schemas import SCHEMAS_DEF
 from pyathena import connect
 
 S3_CLI = client('s3')
@@ -18,6 +17,7 @@ def get_type_string(forecast_type):
         return 'p{:.0f}'.format(float(forecast_type) * 100)
     except ValueError:
         return forecast_type
+
 
 # Move an object within the specified bucket.
 def move_object(bucket, source, destination):
@@ -31,11 +31,10 @@ def move_object(bucket, source, destination):
 
 # Standardize output from Amazon Forecast, adding type field.
 def get_readings(params, bucket):
-
     def create_table(table_name, attributes, input_path, delimiter=','):
         for attribute in attributes:
-            if attribute['AttributeName']=='timestamp':
-                attribute['AttributeType']='string'
+            if attribute['AttributeName'] == 'timestamp':
+                attribute['AttributeType'] = 'string'
         properties = ', '.join(
             [
                 '{} {}'.format(field['AttributeName'], field['AttributeType'])
@@ -47,26 +46,27 @@ def get_readings(params, bucket):
         cursor.execute('DROP TABLE IF EXISTS {};'.format(table_name))
         cursor.execute(
             '''
-            CREATE EXTERNAL TABLE IF NOT EXISTS {table} ({properties}) 
+            CREATE EXTERNAL TABLE IF NOT EXISTS {table} ({properties})
             ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
             WITH SERDEPROPERTIES (
                 'serialization.format' = ',',
-                'field.delim' = '{delimiter}') 
+                'field.delim' = '{delimiter}')
             LOCATION '{input_path}'
             TBLPROPERTIES ('has_encrypted_data'='false','skip.header.line.count'='1');
             '''.format(
                 table=table_name,
                 properties=properties,
                 delimiter=delimiter,
-                input_path=input_path)
+                input_path=input_path
+            )
         )
 
     cursor = connect(
         s3_staging_dir='s3://{}/stage',
-        region_name='us-east-1',
-        work_group=os.environ['ATHENA_WORKGROUP']
+        region_name=environ['AWS_REGION'],
+        work_group=environ['ATHENA_WORKGROUP']
     ).cursor()
-    identifier = schemas_def[params['DatasetGroup']['Domain']]['identifier']
+    identifier = SCHEMAS_DEF[params['DatasetGroup']['Domain']]['identifier']
     datetimestr = '%Y-%m-%d' if params['TimestampFormat'
                                       ] == 'yyyy-MM-dd' else '%Y-%m-%d %H:%i:%s'
 
@@ -77,9 +77,12 @@ def get_readings(params, bucket):
     )
 
     create_table(
-        table_name='test',
+        table_name='forecast',
         attributes=params['Datasets'][0]['Schema']['Attributes'] +
-                   [{'AttributeName':'type', 'AttributeType': 'string'}],
+        [{
+            'AttributeName': 'type',
+            'AttributeType': 'string'
+        }],
         input_path='s3://{}/quicksight/'.format(bucket)
     )
 
@@ -111,14 +114,14 @@ def get_readings(params, bucket):
             }
 
 
-def transform(s3_object, bucket, key):
+def transform(s3_object, bucket, key, params):
     # Transform forecast output into input format
-    params = parameters.get_params(
-        bucket_name=bucket, key_name=os.environ['PARAMS_FILE']
-    )
     csv_buffer = StringIO()
-    schema = schemas_def[params['Datasets'][0]['Domain']]
-    fieldnames = [attr['AttributeName'] for attr in params['Datasets'][0]['Schema']['Attributes']]
+    schema = SCHEMAS_DEF[params['Datasets'][0]['Domain']]
+    fieldnames = [
+        attr['AttributeName']
+        for attr in params['Datasets'][0]['Schema']['Attributes']
+    ]
     out = csv.DictWriter(csv_buffer, fieldnames=fieldnames + ['type'])
     out.writeheader()
     stream = codecs.getreader('utf-8')(s3_object.get()['Body'])
@@ -163,7 +166,8 @@ def lambda_handler(event, context):
                 transform(
                     bucket.Object(key=key),
                     bucket=event['bucket'],
-                    key='format_{}'.format(key)
+                    key='format_{}'.format(key),
+                    params=event['params']
                 )
                 move_object(
                     bucket=event['bucket'],
